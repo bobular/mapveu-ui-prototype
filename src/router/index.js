@@ -18,8 +18,8 @@ const routes = [
       Legend
     }
   },
-   {
-    path: '/view/:view',
+  {
+    path: '/view/:view/panel/:panel',
     name: 'View',
     components: {
       SelectView,

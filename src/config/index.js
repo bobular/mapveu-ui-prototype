@@ -16,13 +16,13 @@ export default {
       id: 'smpl',
       panels: [
 	{
-	  label: 'Sample view info',
-	  id: 'smpl_view_info',
+	  label: 'View info',
+	  id: 'info',
           panelClass: 'ViewInfo'
 	},
 	{
 	  label: 'Info table',
-	  id: 'smpl_info_table',
+	  id: 'table',
           panelClass: 'InfoTable'
 	}
       ]
@@ -30,7 +30,20 @@ export default {
 
     {
       label: 'Genotype',
-      id: 'geno'
+      id: 'geno',
+      panels: [
+	{
+	  label: 'View info',
+	  id: 'info',
+          panelClass: 'ViewInfo'
+	},
+	{
+	  label: 'Special genotype viz',
+	  id: 'viz',
+          panelClass: 'SpecialGenotypeViz'
+	}
+      ]
+
     }
 
   ]

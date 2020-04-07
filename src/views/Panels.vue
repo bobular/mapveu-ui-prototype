@@ -1,16 +1,18 @@
 <template>
   <div class="panels">
     <h2>Panels</h2>
-  </div>
+    <select-panel></select-panel>
+</div>
 </template>
 
 <script>
 // @ is an alias to /src
-// import HelloWorld from '@/components/HelloWorld.vue'
+import SelectPanel from '@/components/SelectPanel.vue'
 
 export default {
   name: 'Panels',
   components: {
+    SelectPanel
   }
 }
 </script>

@@ -1,6 +1,6 @@
 <template>
   <div class="select-view">
-    <v-select :value="currentView" :options="availableViews" @input="switchView" />
+    <v-select :value="currentView" :options="availableViews" @input="switchView" :components="{Deselect}" :placeholder="placeholderText"/>
   </div>
 </template>
 
@@ -12,6 +12,10 @@ import { mapGetters } from 'vuex'
 
 export default {
   name: 'SelectView',
+  data:	() => ({
+  	         Deselect: { render: () => null },
+		 placeholderText: "Choose a view..."
+  	      }),
   components: {
   },
   computed: {
@@ -19,19 +23,16 @@ export default {
   },
   methods: {
     switchView: function(view) {
-      this.$router.push({ path: '/view/'+view.id }).catch(err => console.log(err))
+      this.$router.push({ path: '/view/'+view.id+'/panel/default' }).catch(err => console.log(err))
     }
   },
   watch: {
-    '$route': function(to, from) {
-      if (to) {
-        console.log('to', to)
-        this.$store.commit('setCurrentViewById', to.params.view)
-      } else { console.log('no to') }
-      if (from) { console.log('from', from) } else { console.log('no from') }
+    '$route': function(to) {
+      this.$store.commit('setCurrentViewById', to.params.view)
     }
   },
   created: function() {
+    console.log(this.$route.params)
     this.$store.commit('setCurrentViewById', this.$route.params.view)
   }
 }
