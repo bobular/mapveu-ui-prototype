@@ -2,17 +2,29 @@
   <div class="panels">
     <h2>Panels</h2>
     <select-panel></select-panel>
-</div>
+    <component v-bind:is="currentPanel ? currentPanel.panelClass : 'NoPanel'"></component>
+  </div>
 </template>
 
 <script>
 // @ is an alias to /src
 import SelectPanel from '@/components/SelectPanel.vue'
+import { mapGetters } from 'vuex'
+
+import NoPanel from '@/panels/NoPanel.vue'
+import ViewInfo from '@/panels/ViewInfo.vue'
+import InfoTable from '@/panels/InfoTable.vue'
 
 export default {
   name: 'Panels',
+  computed: {
+    ...mapGetters([ 'currentPanel' ])
+  },
   components: {
-    SelectPanel
+    SelectPanel,
+    NoPanel,
+    ViewInfo,
+    InfoTable
   }
 }
 </script>

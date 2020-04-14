@@ -32,7 +32,6 @@ export default {
     }
   },
   created: function() {
-    console.log(this.$route.params)
     this.$store.commit('setCurrentViewById', this.$route.params.view)
   }
 }

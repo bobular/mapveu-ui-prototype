@@ -1,8 +1,6 @@
 <template>
   <div class="select-panel">
     <v-select :value="currentPanel" :options="availablePanels" @input="switchPanel" :components="{Deselect}"/>
-
-    <span>current panel: {{ currentPanel }}</span>
 </div>
 </template>
 
