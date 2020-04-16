@@ -2,7 +2,12 @@
   <div class="panel info-table">
     <h3>{{ currentView.singularRecordType }} details</h3>
     results here
-  </div>
+    <ol>
+      <li v-for="record in records" :key="record.id">
+        {{ record.id }} : {{ record.label }}
+      </li>
+    </ol>
+</div>
 </template>
 
 <script>
@@ -11,8 +16,9 @@ import { mapGetters } from 'vuex'
 export default {
   name: 'InfoTable',
   computed: {
-    ...mapGetters([ 'currentView' ])
-  }
+    ...mapGetters([ 'currentView', 'records' ])
+  },
+  created: function () { this.$store.dispatch('getRecords') }
 }
 </script>
 

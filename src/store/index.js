@@ -4,6 +4,7 @@ Vue.use(Vuex)
 
 import config from '../config'
 
+import axios from 'axios'
 
 export default new Vuex.Store({
   strict: true, // FOR DEVELOPMENT ONLY (CPU drain)
@@ -11,7 +12,8 @@ export default new Vuex.Store({
 
   state: { config,
            currentView: null,
-	   currentPanel: null
+	   currentPanel: null,
+	   records: []
          },
   getters: {
     currentView: state => {
@@ -20,12 +22,14 @@ export default new Vuex.Store({
     availableViews: state => {
       return state.config.views
     },
-
     currentPanel: state => {
       return state.currentPanel
     },
     availablePanels: state => {
       return state.currentView ? state.currentView.panels : []
+    },
+    records: state => {
+      return state.records
     }
   },
   mutations: {
@@ -39,9 +43,21 @@ export default new Vuex.Store({
             state.currentView.panels[0] :
 	    state.currentView.panels.find(panel => panel.id === id)
       }
+    },
+    setRecords (state, response) {
+      state.records = response.data
     }
   },
   actions: {
+    async getRecords (context) {
+      context.commit('setRecords',
+		     await axios.get('/view/Genotype/panel/InfoTable/records',
+				     {
+                                       params: {
+                                         fields: [ 'id', 'label' ]
+                                       }
+                                     }))
+    }
   },
   modules: {
   }
