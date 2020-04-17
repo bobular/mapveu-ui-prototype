@@ -23,16 +23,18 @@ export default {
   },
   methods: {
     switchView: function(view) {
-      this.$router.push({ path: '/view/'+view.id+'/panel/default' }).catch(err => console.log(err))
+      // TO DO: check to see if the current panel is also available in the view
+      //        we are switching to, and add it to the path instead of 'default'
+      this.$router.push({ path: '/view/'+view.className+'/panel/default' }).catch(err => console.log(err))
     }
   },
   watch: {
     '$route': function(to) {
-      this.$store.commit('setCurrentViewById', to.params.view)
+      this.$store.commit('setCurrentViewByClassName', to.params.view)
     }
   },
   created: function() {
-    this.$store.commit('setCurrentViewById', this.$route.params.view)
+    this.$store.commit('setCurrentViewByClassName', this.$route.params.view)
   }
 }
 </script>

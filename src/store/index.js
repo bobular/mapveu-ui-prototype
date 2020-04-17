@@ -33,25 +33,30 @@ export default new Vuex.Store({
     }
   },
   mutations: {
-    setCurrentViewById (state, id) {
-      state.currentView = state.config.views.find(view => view.id === id)
+    setCurrentViewByClassName (state, className) {
+      state.currentView =
+	className === 'default' ?
+	state.config.views[0] :
+	state.config.views.find(view => view.className === className)
     },
-    setCurrentPanelById (state, id) {
+    setCurrentPanelByClassName (state, className) {
       if (state.currentView) {
 	state.currentPanel =
-	  id === 'default' ?
+	  className === 'default' ?
             state.currentView.panels[0] :
-	    state.currentView.panels.find(panel => panel.id === id)
+	    state.currentView.panels.find(panel => panel.className === className)
       }
     },
-    setRecords (state, response) {
+    setRecordsFromResponse (state, response) {
       state.records = response.data
     }
   },
   actions: {
     async getRecords (context) {
-      context.commit('setRecords',
-		     await axios.get('/view/Genotype/panel/InfoTable/records',
+      const viewClass = context.getters.currentView.className
+      const panelClass = context.getters.currentPanel.className
+      context.commit('setRecordsFromResponse',
+		     await axios.get('/api/view/'+viewClass+'/panel/'+panelClass+'/records',
 				     {
                                        params: {
                                          fields: [ 'id', 'label' ]

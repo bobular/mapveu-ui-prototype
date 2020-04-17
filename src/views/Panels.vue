@@ -2,7 +2,7 @@
   <div class="panels">
     <h2>Panels</h2>
     <select-panel></select-panel>
-    <component v-bind:is="currentPanel ? currentPanel.panelClass : 'NoPanel'"></component>
+    <component v-bind:is="currentPanel ? currentPanel.className : 'NoPanel'"></component>
   </div>
 </template>
 

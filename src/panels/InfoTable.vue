@@ -1,6 +1,6 @@
 <template>
   <div class="panel info-table">
-    <h3>{{ currentView.singularRecordType }} details</h3>
+    <h3>{{ currentView.recordLabelSingular }} details</h3>
     results here
     <ol>
       <li v-for="record in records" :key="record.id">

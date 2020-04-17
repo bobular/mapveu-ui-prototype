@@ -15,17 +15,17 @@ export default {
   },
   methods: {
     switchPanel: function(panel) {
-      const viewId = this.$route.params.view
-      this.$router.push({ path: '/view/'+viewId+'/panel/'+panel.id }).catch(err => console.log(err))
+      const viewClass = this.$route.params.view
+      this.$router.push({ path: '/view/'+viewClass+'/panel/'+panel.className }).catch(err => console.log(err))
     }
   },
   watch: {
     '$route': function(to) {
-      this.$store.commit('setCurrentPanelById', to.params.panel)
+      this.$store.commit('setCurrentPanelByClassName', to.params.panel)
     }
   },
   created: function() {
-    this.$store.commit('setCurrentPanelById', this.$route.params.panel)
+    this.$store.commit('setCurrentPanelByClassName', this.$route.params.panel)
   }
 }
 </script>

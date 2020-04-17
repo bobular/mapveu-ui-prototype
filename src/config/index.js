@@ -13,45 +13,40 @@ export default {
   views: [
     {
       label: 'Sample',
-      id: 'smpl',
+      className: 'Sample',
       description: 'This view shows sample records',
-      singularRecordType: 'sample',
-      pluralRecordType: 'samples',      
+      recordLabelSingular: 'sample',
+      recordLabelPlural: 'samples',      
       panels: [
 	{
 	  label: 'View info',
-	  id: 'info',
-          panelClass: 'ViewInfo'
+          className: 'ViewInfo'
 	},
 	{
 	  label: 'Info table',
-	  id: 'table',
-          panelClass: 'InfoTable'
+          className: 'InfoTable'
 	}
       ]
     },
 
     {
       label: 'Genotype',
-      id: 'geno',
+      className: 'Genotype', 
       description: 'This view shows genotype records',
-      singularRecordType: 'genotype',
-      pluralRecordType: 'genotypes',      
+      recordLabelSingular: 'genotype',
+      recordLabelPlural: 'genotypes',      
       panels: [
 	{
 	  label: 'View info',
-	  id: 'info',
-          panelClass: 'ViewInfo'
+          className: 'ViewInfo'
 	},
 	{
 	  label: 'Info table',
-	  id: 'table',
-          panelClass: 'InfoTable'
+          className: 'InfoTable'
 	},
 	{
 	  label: 'Special genotype viz',
-	  id: 'viz',
-          panelClass: 'SpecialGenotypeViz'
+          className: 'SpecialGenotypeViz'
 	}
       ]
 
