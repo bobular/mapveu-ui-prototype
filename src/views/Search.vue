@@ -1,6 +1,6 @@
 <template>
-  <div class="markers">
-    <h2>Markers</h2>
+  <div class="search">
+    <h2>Search box</h2>
   </div>
 </template>
 
@@ -9,19 +9,21 @@
 // import HelloWorld from '@/components/HelloWorld.vue'
 
 export default {
-  name: 'Markers',
+  name: 'Search',
   components: {
   }
 }
 </script>
 
+
 <style>
-div.markers {
-  background-color: beige;
+div.search {
+  background-color: plum;
   
   grid-column-start: 2;
   grid-column-end: 3;
-  grid-row-start: 2;
-  grid-row-end: 4;
+  grid-row-start: 1;
+  grid-row-end: span 1;
 }
 </style>
+

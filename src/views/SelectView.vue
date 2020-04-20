@@ -1,6 +1,7 @@
 <template>
   <div class="select-view">
-    <v-select :value="currentView" :options="availableViews" @input="switchView" :components="{Deselect}" :placeholder="placeholderText"/>
+  <h2>View</h2>
+  <v-select :value="currentView" :options="availableViews" @input="switchView" :components="{Deselect}" :placeholder="placeholderText"/>
   </div>
 </template>
 
@@ -45,7 +46,7 @@ export default {
 
 <style>
 div.select-view {
-  background-color: lightyellow;
+  background-color: seashell;
   
   grid-column-start: 1;
   grid-column-end: 1;
