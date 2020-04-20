@@ -23,9 +23,13 @@ export default {
   },
   methods: {
     switchView: function(view) {
-      // TO DO: check to see if the current panel is also available in the view
-      //        we are switching to, and add it to the path instead of 'default'
-      this.$router.push({ path: '/view/'+view.className+'/panel/default' }).catch(err => console.log(err))
+      // panel can stay the same if the view we are switching to also has it
+      let currentPanel = this.$store.state.currentPanel
+      let newPanelClass = 'default'
+      if (currentPanel && view.panels.find(panel => panel.className === currentPanel.className)) {
+        newPanelClass = currentPanel.className
+      }
+      this.$router.push({ path: '/view/'+view.className+'/panel/'+newPanelClass }).catch(err => console.log(err))
     }
   },
   watch: {
