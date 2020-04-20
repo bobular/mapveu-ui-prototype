@@ -14,6 +14,11 @@ module.exports = {
         changeOrigin: true
       }
     }
-  }
+  },
 
+  // from https://stackoverflow.com/questions/54309478/vue-router-always-loads-the-lazy-loaded-modules-on-intial-loading
+  // lazy loading wasn't working until adding this
+  chainWebpack: config => {
+    config.plugins.delete('prefetch');
+  }
 }
