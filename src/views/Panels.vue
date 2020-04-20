@@ -14,6 +14,7 @@ import { mapGetters } from 'vuex'
 import NoPanel from '@/panels/NoPanel.vue'
 import ViewInfo from '@/panels/ViewInfo.vue'
 import InfoTable from '@/panels/InfoTable.vue'
+import SpecialGenotypeViz from '@/panels/SpecialGenotypeViz.vue'
 
 export default {
   name: 'Panels',
@@ -24,7 +25,8 @@ export default {
     SelectPanel,
     NoPanel,
     ViewInfo,
-    InfoTable
+    InfoTable,
+    SpecialGenotypeViz
   }
 }
 </script>

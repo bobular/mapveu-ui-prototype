@@ -18,7 +18,11 @@ export default {
   computed: {
     ...mapGetters([ 'currentView', 'records' ])
   },
-  created: function () { this.$store.dispatch('getRecords') }
+  created: function () { this.$store.dispatch('getRecords') },
+  watch: {
+    // reload data if changing views
+    'currentView': function () { this.$store.dispatch('getRecords') }
+  }
 }
 </script>
 
