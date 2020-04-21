@@ -1,7 +1,8 @@
 <template>
   <div class="search">
     <h2>Search box</h2>
-  </div>
+    TBC
+</div>
 </template>
 
 <script>

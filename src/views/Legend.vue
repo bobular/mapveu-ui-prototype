@@ -1,7 +1,8 @@
 <template>
   <div class="legend">
     <h2>Legend</h2>
-  </div>
+    TBC
+</div>
 </template>
 
 <script>

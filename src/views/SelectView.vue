@@ -30,7 +30,14 @@ export default {
       if (currentPanel && view.panels.find(panel => panel.className === currentPanel.className)) {
         newPanelClass = currentPanel.className
       }
-      this.$router.push({ path: '/view/'+view.className+'/panel/'+newPanelClass }).catch(err => console.log(err))
+      // marker can stay the same if the view still has it
+      let currentMarker = this.$store.state.currentMarker
+      let newMarkerClass = 'default'
+      if (currentMarker && view.markers.find(marker => marker.className === currentMarker.className)) {
+        newMarkerClass = currentMarker.className
+      }
+      
+      this.$router.push({ path: '/view/'+view.className+'/panel/'+newPanelClass+'/marker/'+newMarkerClass }).catch(err => console.log(err))
     }
   },
   watch: {

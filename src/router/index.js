@@ -7,16 +7,27 @@ import SelectMarker from '../views/SelectMarker.vue'
 import Markers from '../views/Markers.vue'
 import Legend from '../views/Legend.vue'
 
+import config from '@/config'
+
 Vue.use(VueRouter)
 
 const routes = [
   {
     path: '/',
-    redirect: '/view/default/panel/default'
+    redirect: function() {
+      return {
+	name: 'main',
+        params: {
+	  view: config.views[0].className,
+	  panel: config.views[0].panels[0].className,
+	  marker: config.views[0].markers[0].className
+	}
+      }
+    }
   },
   {
-    path: '/view/:view/panel/:panel',
-    name: 'View',
+    path: '/view/:view/panel/:panel/marker/:marker',
+    name: 'main',
     components: {
       SelectView,
       Panels,

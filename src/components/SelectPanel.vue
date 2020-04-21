@@ -1,7 +1,7 @@
 <template>
   <div class="select-panel">
     <v-select :value="currentPanel" :options="availablePanels" @input="switchPanel" :components="{Deselect}"/>
-</div>
+  </div>
 </template>
 
 <script>
@@ -15,8 +15,9 @@ export default {
   },
   methods: {
     switchPanel: function(panel) {
-      const viewClass = this.$route.params.view
-      this.$router.push({ path: '/view/'+viewClass+'/panel/'+panel.className }).catch(err => console.log(err))
+      const viewClass = this.$store.state.currentView.className // null check needed on currentView?
+      const markerClass = this.$store.state.currentMarker.className // ditto
+      this.$router.push({ path: '/view/'+viewClass+'/panel/'+panel.className+'/marker/'+markerClass }).catch(err => console.log(err))
     }
   },
   watch: {

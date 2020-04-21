@@ -13,6 +13,7 @@ export default new Vuex.Store({
   state: { config,
            currentView: null,
 	   currentPanel: null,
+	   currentMarker: null,
 	   records: []
          },
   getters: {
@@ -30,6 +31,12 @@ export default new Vuex.Store({
     },
     records: state => {
       return state.records
+    },
+    currentMarker: state => {
+      return state.currentMarker
+    },
+    availableMarkers: state => {
+      return state.currentView ? state.currentView.markers : []      
     }
   },
   mutations: {
@@ -45,6 +52,14 @@ export default new Vuex.Store({
 	  className === 'default' ?
             state.currentView.panels[0] :
 	    state.currentView.panels.find(panel => panel.className === className)
+      }
+    },
+    setCurrentMarkerByClassName (state, className) {
+      if (state.currentView) {
+	state.currentMarker =
+	  className === 'default' ?
+            state.currentView.markers[0] :
+	    state.currentView.markers.find(marker => marker.className === className)
       }
     },
     setRecordsFromResponse (state, response) {

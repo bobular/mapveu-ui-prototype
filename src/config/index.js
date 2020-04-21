@@ -26,6 +26,16 @@ export default {
 	  label: 'Info table',
           className: 'InfoTable'
 	}
+      ],
+      markers: [
+	{
+	  label: 'Samples',
+	  className: 'RecordCount'
+	},
+	{
+	  label: 'Collections',
+	  className: 'CollectionCount'
+	}
       ]
     },
 
@@ -47,6 +57,16 @@ export default {
 	{
 	  label: 'Special genotype viz',
           className: 'SpecialGenotypeViz'
+	}
+      ],
+      markers: [
+	{
+	  label: 'Allele count',
+	  className: 'AlleleCount'
+	},
+	{
+	  label: 'Genotype records',
+	  className: 'RecordCount'
 	}
       ]
 
