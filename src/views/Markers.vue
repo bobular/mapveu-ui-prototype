@@ -1,7 +1,7 @@
 <template>
   <div class="markers">
     <h2>Markers</h2>
-  This is supposed to simulate the main map. We will add a button to "pan/zoom" the map.
+  This is supposed to simulate the main map. We will add a button to "pan/zoom" the map, and make something happen when you click on the markers.
   <br />
   <span v-if="currentMarker">It will need to render items below in specialised components, e.g. for {{ currentMarker.className }}</span>
 

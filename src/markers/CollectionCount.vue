@@ -11,5 +11,8 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
+li span {
+  color: green;
+}
 </style>
