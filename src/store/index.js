@@ -14,7 +14,8 @@ export default new Vuex.Store({
            currentView: null,
 	   currentPanel: null,
 	   currentMarker: null,
-	   records: []
+	   markerData: null,
+	   records: [] // TO DO: move to InfoTable module
          },
   getters: {
     currentView: state => {
@@ -29,14 +30,18 @@ export default new Vuex.Store({
     availablePanels: state => {
       return state.currentView ? state.currentView.panels : []
     },
-    records: state => {
-      return state.records
-    },
     currentMarker: state => {
       return state.currentMarker
     },
     availableMarkers: state => {
       return state.currentView ? state.currentView.markers : []      
+    },
+    markerData: state => {
+      return state.markerData
+    },
+    // records should be in an InfoTable module
+    records: state => {
+      return state.records
     }
   },
   mutations: {
@@ -64,19 +69,41 @@ export default new Vuex.Store({
     },
     setRecordsFromResponse (state, response) {
       state.records = response.data
+    },
+    setMarkerDataFromResponse (state, response) {
+      state.markerData = response.data
     }
+
   },
   actions: {
-    async getRecords (context) {
-      const viewClass = context.getters.currentView.className
-      const panelClass = context.getters.currentPanel.className
-      context.commit('setRecordsFromResponse',
-		     await axios.get('/api/view/'+viewClass+'/panel/'+panelClass+'/records',
-				     {
-                                       params: {
-                                         fields: [ 'id', 'label' ]
-                                       }
-                                     }))
+    async getRecords (context) { // may need to go in InfoTable module
+      if (context.getters.currentView && context.getters.currentPanel) {
+	const viewClass = context.getters.currentView.className
+	const panelClass = context.getters.currentPanel.className
+	context.commit('setRecordsFromResponse',
+		       await axios.get('/api/view/'+viewClass+'/panel/'+panelClass+'/records',
+				       {
+					 params: {
+                                           fields: [ 'id', 'label' ]
+					 }
+                                       }))
+      }
+    },
+    async getMarkerData (context) {
+      if (context.getters.currentView && context.getters.currentMarker) {
+	const viewClass = context.getters.currentView.className
+	const markerClass = context.getters.currentMarker.className
+	context.commit('setMarkerDataFromResponse',
+		       await axios.get('/api/view/'+viewClass+'/marker/'+markerClass+'/markerData',
+				       {
+					 params: {
+					   q: '*:*',
+                                           geoField: 'geohash_1',
+					   catField: 'species_category'
+					 }
+                                       }))
+      }
+
     }
   },
   modules: {
