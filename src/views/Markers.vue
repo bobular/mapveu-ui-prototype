@@ -7,7 +7,7 @@
 
   <ul v-if="markerData">
     <li v-for="geoBucket in markerData.geo.buckets" :key="geoBucket.val">
-      {{ geoBucket.val }} : {{ geoBucket.count }}
+      <component v-bind:is="currentMarker.className" :data="geoBucket"></component>
     </li>
   </ul>
 
@@ -16,10 +16,12 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import siteMarkers from '@/config/markers'
 
 export default {
   name: 'Markers',
   components: {
+    ...siteMarkers
   },
   computed: {
     ...mapGetters([ 'currentMarker', 'markerData' ])
