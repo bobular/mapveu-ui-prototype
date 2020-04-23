@@ -2,12 +2,18 @@
   <div class="panel info-table">
     <h3>{{ currentView.recordLabelSingular }} details</h3>
     results here
-    <ol>
-      <li v-for="record in records" :key="record.id">
-        {{ record.id }} : {{ record.label }}
-      </li>
-    </ol>
-</div>
+    <div class="scroll-bar">
+      <ol>
+        <li v-for="record in records" :key="record.id">
+          <ul>
+            <li v-for="field in currentView.fields" :key="field.label">
+              {{ field.label }} : {{ record[field.displayField] }}
+            </li>
+          </ul>
+        </li>
+      </ol>
+    </div>  
+  </div>
 </template>
 
 <script>
@@ -28,6 +34,9 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
+  div.scroll-bar {
+    overflow: scroll;
+    height: 450px;
+  }
 
 </style>

@@ -77,22 +77,30 @@ export default new Vuex.Store({
   },
   actions: {
     async getRecords (context) { // may need to go in InfoTable module
-      if (context.getters.currentView && context.getters.currentPanel) {
-	const viewClass = context.getters.currentView.className
-	const panelClass = context.getters.currentPanel.className
+      const currentView = context.getters.currentView
+      const currentPanel = context.getters.currentPanel
+      if (currentView && currentPanel) {
+	const viewClass = currentView.className
+	const panelClass = currentPanel.className
 	context.commit('setRecordsFromResponse',
 		       await axios.get('/api/view/'+viewClass+'/panel/'+panelClass+'/records',
 				       {
 					 params: {
-                                           fields: [ 'id', 'label' ]
+                                           fields: // [ 'id', 'label'
+					     currentView.fields.
+					       filter(field => field.displayField).
+					       map(field => field.displayField)
+//					   ]
 					 }
                                        }))
       }
     },
     async getMarkerData (context) {
-      if (context.getters.currentView && context.getters.currentMarker) {
-	const viewClass = context.getters.currentView.className
-	const markerClass = context.getters.currentMarker.className
+      const currentView = context.getters.currentView
+      const currentMarker = context.getters.currentMarker
+      if (currentView && currentMarker) {
+	const viewClass = currentView.className
+	const markerClass = currentMarker.className
 	context.commit('setMarkerDataFromResponse',
 		       await axios.get('/api/view/'+viewClass+'/marker/'+markerClass+'/markerData',
 				       {
