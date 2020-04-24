@@ -1,7 +1,6 @@
 <template>
   <div class="panel info-table">
     <h3>{{ currentView.recordLabelSingular }} details</h3>
-    results here
     <div class="scroll-bar">
       <ol>
         <li v-for="record in records" :key="record.id">
@@ -26,7 +25,7 @@ export default {
 
     ...mapGetters([ 'currentView' ]),
     
-    records: function () {
+    records() {
       return this.$store.getters['panels/InfoTable/records']
     }
   },
