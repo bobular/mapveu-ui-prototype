@@ -61,7 +61,7 @@ export default {
           className: 'ViewInfo'
 	},
 	{
-	  label: 'Info table',
+	  label: 'Details table',
           className: 'InfoTable'
 	}
       ],
@@ -163,7 +163,7 @@ export default {
           className: 'ViewInfo'
 	},
 	{
-	  label: 'Info table',
+	  label: 'Details table',
           className: 'InfoTable'
 	},
 	{
