@@ -2,8 +2,8 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 Vue.use(Vuex)
 
-import config from '../config'
-import panelModules from './panels'
+import config from '@/config'
+import panelModules from '@/config/store/panels'
 
 import axios from 'axios'
 

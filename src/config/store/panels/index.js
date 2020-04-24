@@ -1,5 +1,4 @@
-import InfoTable from './InfoTable'
-
+import InfoTable from '@/store/panels/InfoTable'
 
 export default {
 
