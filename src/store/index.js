@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 
 import config from '../config'
+import panelModules from './panels'
 
 import axios from 'axios'
 
@@ -14,8 +15,7 @@ export default new Vuex.Store({
            currentView: null,
 	   currentPanel: null,
 	   currentMarker: null,
-	   markerData: null,
-	   records: [] // TO DO: move to InfoTable module
+	   markerData: null
          },
   getters: {
     currentView: state => {
@@ -38,10 +38,6 @@ export default new Vuex.Store({
     },
     markerData: state => {
       return state.markerData
-    },
-    // records should be in an InfoTable module
-    records: state => {
-      return state.records
     }
   },
   mutations: {
@@ -67,34 +63,12 @@ export default new Vuex.Store({
 	    state.currentView.markers.find(marker => marker.className === className)
       }
     },
-    setRecordsFromResponse (state, response) {
-      state.records = response.data
-    },
     setMarkerDataFromResponse (state, response) {
       state.markerData = response.data
     }
 
   },
   actions: {
-    async getRecords (context) { // may need to go in InfoTable module
-      const currentView = context.getters.currentView
-      const currentPanel = context.getters.currentPanel
-      if (currentView && currentPanel) {
-	const viewClass = currentView.className
-	const panelClass = currentPanel.className
-	context.commit('setRecordsFromResponse',
-		       await axios.get('/api/view/'+viewClass+'/panel/'+panelClass+'/records',
-				       {
-					 params: {
-                                           fields: // [ 'id', 'label'
-					     currentView.fields.
-					       filter(field => field.displayField).
-					       map(field => field.displayField)
-//					   ]
-					 }
-                                       }))
-      }
-    },
     async getMarkerData (context) {
       const currentView = context.getters.currentView
       const currentMarker = context.getters.currentMarker
@@ -115,5 +89,6 @@ export default new Vuex.Store({
     }
   },
   modules: {
+    panels : panelModules
   }
 })

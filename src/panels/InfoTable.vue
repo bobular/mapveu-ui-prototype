@@ -21,13 +21,21 @@ import { mapGetters } from 'vuex'
 
 export default {
   name: 'InfoTable',
+
   computed: {
-    ...mapGetters([ 'currentView', 'records' ])
+
+    ...mapGetters([ 'currentView' ]),
+    
+    records: function () {
+      return this.$store.getters['panels/InfoTable/records']
+    }
   },
-  created: function () { this.$store.dispatch('getRecords') },
+
+  created: function () { this.$store.dispatch('panels/InfoTable/getRecords') },
+
   watch: {
     // reload data if changing views
-    'currentView': function () { this.$store.dispatch('getRecords') }
+    'currentView': function () { this.$store.dispatch('panels/InfoTable/getRecords') }
   }
 }
 </script>
