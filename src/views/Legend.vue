@@ -24,7 +24,7 @@ div.legend {
   grid-column-start: 3;
   grid-column-end: 3;
   grid-row-start: 3;
-  grid-row-end: span 1;
+  grid-row-end: 5;
 }
 </style>
 

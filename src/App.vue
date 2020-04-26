@@ -7,6 +7,7 @@
       <router-view name="Markers"/>
       <router-view name="SelectMarker"/>
       <router-view name="Legend"/>
+      <router-view name="Status"/>
     </div>
   </div>
 </template>
@@ -22,7 +23,7 @@
 .container {
   display: grid;
   grid-template-columns: 30% 50% 20%;
-  grid-template-rows: 75px 225px 400px;
+  grid-template-rows: 75px 225px 400px 50px;
   background-color: gray50;
 }
 

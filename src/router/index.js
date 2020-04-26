@@ -6,6 +6,7 @@ import Search from '../views/Search.vue'
 import SelectMarker from '../views/SelectMarker.vue'
 import Markers from '../views/Markers.vue'
 import Legend from '../views/Legend.vue'
+import Status from '../views/Status.vue'
 
 import config from '@/config'
 
@@ -34,7 +35,8 @@ const routes = [
       Search,
       SelectMarker,
       Markers,
-      Legend
+      Legend,
+      Status
     }
   }
 ]

@@ -15,7 +15,8 @@ export default new Vuex.Store({
            currentView: null,
 	   currentPanel: null,
 	   currentMarker: null,
-	   markerData: null
+	   markerData: null,
+	   currentSelection: null
          },
   getters: {
     currentView: state => {
@@ -38,6 +39,9 @@ export default new Vuex.Store({
     },
     markerData: state => {
       return state.markerData
+    },
+    currentSelection: state => {
+      return state.currentSelection
     }
   },
   mutations: {
@@ -65,6 +69,9 @@ export default new Vuex.Store({
     },
     setMarkerDataFromResponse (state, response) {
       state.markerData = response.data
+    },
+    setCurrentSelection (state, selection) {
+      state.currentSelection = selection
     }
 
   },

@@ -35,7 +35,7 @@ div.panels {
   grid-column-start: 1;
   grid-column-end: 1;
   grid-row-start: 2;
-  grid-row-end: 4;
+  grid-row-end: 5;
 }
 
 </style>

@@ -43,7 +43,7 @@ export default {
 <style scoped>
   div.scroll-bar {
     overflow: scroll;
-    height: 450px;
+    height: 500px;
   }
 
 </style>
