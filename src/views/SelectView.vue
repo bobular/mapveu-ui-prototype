@@ -43,6 +43,9 @@ export default {
   watch: {
     '$route': function(to) {
       this.$store.commit('setCurrentViewByClassName', to.params.view)
+      this.$store.commit('clearClickedMarkerFilter')
+      // I'm not convinced watching the entire route is the optimal strategy
+      // but it works for now.
     }
   },
   created: function() {

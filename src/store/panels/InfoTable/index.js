@@ -24,7 +24,8 @@ export default {
     async getRecords ({commit, rootGetters}) {
       const currentView = rootGetters.currentView
       const currentPanel = rootGetters.currentPanel
-      if (currentView && currentPanel) {
+      const clickedMarkerFilter = rootGetters.clickedMarkerFilter
+      if (currentView && currentPanel && clickedMarkerFilter) {
 	const viewClass = currentView.className
 	const panelClass = currentPanel.className
 	commit('setRecordsFromResponse',
@@ -34,7 +35,8 @@ export default {
                                    fields:
 				   currentView.fields.
 				     filter(field => field.displayField).
-				     map(field => field.displayField)
+				     map(field => field.displayField),
+				   geoFilter: clickedMarkerFilter
 				 }
                                }))
       }

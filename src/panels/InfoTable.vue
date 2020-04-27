@@ -1,7 +1,7 @@
 <template>
   <div class="panel info-table">
-    <h3>{{ currentView.recordLabelSingular }} details</h3>
-    <div class="scroll-bar">
+  <h3>{{ currentView.recordLabelSingular }} details</h3>
+    <div v-if="clickedMarkerFilter" class="scroll-bar">
       <ol>
         <li v-for="record in records" :key="record.id">
           <ul>
@@ -12,6 +12,9 @@
         </li>
       </ol>
     </div>  
+    <div v-else>
+      Click a marker to see some data
+    </div>
   </div>
 </template>
 
@@ -23,7 +26,7 @@ export default {
 
   computed: {
 
-    ...mapGetters([ 'currentView' ]),
+    ...mapGetters([ 'currentView', 'clickedMarkerFilter' ]),
     
     records() {
       return this.$store.getters['panels/InfoTable/records']
@@ -34,7 +37,9 @@ export default {
 
   watch: {
     // reload data if changing views
-    'currentView': function () { this.$store.dispatch('panels/InfoTable/getRecords') }
+    'currentView': function () { this.$store.dispatch('panels/InfoTable/getRecords') },
+    // or on marker click
+    'clickedMarkerFilter': function () { this.$store.dispatch('panels/InfoTable/getRecords') }
   }
 }
 </script>

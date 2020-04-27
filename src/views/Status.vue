@@ -1,6 +1,7 @@
 <template>
   <div class="status">
-  Status info: <component v-bind:is="currentMarker ? currentMarker.className+'Status' : 'NoMarkerStatus'"></component>
+  Clicked marker filter = {{ clickedMarkerFilter }}
+  <component v-bind:is="currentMarker ? currentMarker.className+'Status' : 'NoMarkerStatus'"></component>
   </div>
 </template>
 
@@ -17,7 +18,7 @@ export default {
     ...siteMarkers
   },
   computed: {
-    ...mapGetters([ 'currentMarker' ])
+    ...mapGetters([ 'currentMarker', 'clickedMarkerFilter' ])
   }  
 }
 </script>

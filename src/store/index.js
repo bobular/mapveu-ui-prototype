@@ -16,7 +16,7 @@ export default new Vuex.Store({
 	   currentPanel: null,
 	   currentMarker: null,
 	   markerData: null,
-	   currentSelection: null
+	   clickedMarkerFilter: null
          },
   getters: {
     currentView: state => {
@@ -40,9 +40,11 @@ export default new Vuex.Store({
     markerData: state => {
       return state.markerData
     },
-    currentSelection: state => {
-      return state.currentSelection
+
+    clickedMarkerFilter: state => {
+      return state.clickedMarkerFilter
     }
+
   },
   mutations: {
     setCurrentViewByClassName (state, className) {
@@ -70,8 +72,16 @@ export default new Vuex.Store({
     setMarkerDataFromResponse (state, response) {
       state.markerData = response.data
     },
-    setCurrentSelection (state, selection) {
-      state.currentSelection = selection
+
+    // this is Solr-specific just for the prototype
+    // the full implementation for creating filters from selected marker(s)
+    // or rectangles or polygons needs to be implemented in a back-end
+    // agnostic manner and much more sophisticated than this, obviously
+    setClickedMarkerFilter (state, fq) {
+      state.clickedMarkerFilter = fq
+    },
+    clearClickedMarkerFilter (state) {
+      state.clickedMarkerFilter = null
     }
 
   },
