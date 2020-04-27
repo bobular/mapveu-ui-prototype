@@ -1,8 +1,6 @@
 <template>
-  <div class="marker-status record-count-status">
-  <span v-if="markerData">
+  <div v-if="markerData" class="marker-status record-count-status">
     {{ markerData.count }} records shown
-  </span>
   </div>
 </template>
 

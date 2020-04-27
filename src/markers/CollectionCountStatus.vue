@@ -1,5 +1,5 @@
 <template>
-  <div class="marker-status collection-count-status">
+  <div v-if="markerData" class="marker-status collection-count-status">
     {{ markerData.collectionCount }} collections shown
   </div>
 </template>

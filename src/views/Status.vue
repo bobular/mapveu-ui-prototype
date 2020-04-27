@@ -1,6 +1,6 @@
 <template>
   <div class="status">
-  Clicked marker filter = {{ clickedMarkerFilter }}
+  <span v-if="clickedMarkerFilter">Clicked marker filter = {{ clickedMarkerFilter }}</span>
   <component v-bind:is="currentMarker ? currentMarker.className+'Status' : 'NoMarkerStatus'"></component>
   </div>
 </template>

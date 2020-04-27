@@ -1,5 +1,5 @@
 <template>
-  <div class="marker-status allele-count-status">
+  <div v-if="markerData" class="marker-status allele-count-status">
     {{ markerData.alleleCount }} alleles shown
   </div>
 </template>
