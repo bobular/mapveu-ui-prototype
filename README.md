@@ -5,6 +5,10 @@
 npm install
 ```
 
+### Start REST service for development
+Clone https://github.com/bobular/mapveu-rest-prototype/
+and follow instructions in the README.
+
 ### Compiles and hot-reloads for development
 ```
 npm run serve
