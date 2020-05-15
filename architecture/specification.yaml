@@ -1,0 +1,208 @@
+### DOCUMENT CONVENTIONS
+
+#
+# UI elements: like-this
+#
+# Data: camelCase
+#
+# Messages: LIKE_THIS
+#
+
+### OVERALL UI ARCHITECTURE
+
+#
+# views: Each view shows a different set of records (before filtering on geo or metadata).
+#        The records for each view may have a different set of fields, though ideally some will be overlapping so that
+#        at least some filters can be "carried over" when switching between views.
+#        
+# markers: A set of available/allowed marker classes is configured per view.
+#          All views must have at least one marker type configured.  Markers will always be
+#          semantically zoomed according to either geohash_x fields or some other fields (e.g. country, adm1, adm2).
+#          Markers that need special data (e.g. data specific to chromosomal inversions) need special data service endpoints.
+#
+# panels: A set of available/allowed panel classes is configured per view.
+#         Example panels would be "details table" or "stacked timeline plot" or "download CSV"
+#         Panels are responsible for requesting their own data, but have access to application-wide filters.
+#         Panels should ideally offer the choice of displaying data for
+#         a) the current selected marker(s)
+#         b) the current visible markers (in the viewport)
+#         c) all data matching the current metadata-based filters
+#         d) all data
+#
+# At a time, one view, one marker type and one panel can be active.  We are thinking of putting
+# these in the URL (single page application with forward/backward history).
+#
+#
+# filters:
+#  geo-based: viewport bounding box, current selected marker(s) and or drawn polygons
+#  metadata-based: e.g. species=Anopheles gambiae, date="2002 to 2005"
+#
+# field names: The 'species' and 'date' field names in the filter examples above will be configured per view.
+#              For a given field, there could be a display field and a search field.  The display field
+#              might be single-valued string-type (in terms of Solr faceting behaviour) while the search
+#              field could be multi-valued and contain parent ontology terms, synoyms etc.
+#
+# 
+
+
+
+
+### UI ELEMENTS
+
+#
+# isCore: would this element exist in a map with no plugins configured?
+#
+
+the-map:
+  description:
+    The main zoomable map, handled by Leaflet.js.  Usually full-screen, but not necessarily.
+  isCore: true
+  emits: MOVED_OR_ZOOMED, CLEAR_GEOSELECTION
+
+marker-selector:
+  description:
+    Allows the user to choose which type of marker (from those configured for this view) to use
+  isCore: true
+  consumes: availableMarkers
+  produces: currentMarker
+
+the-markers:
+  description:
+    A layer of clickable markers (could be circles, polygons, rectangles, depending on marker plugin/class).
+    To start with, just one layer would be shown. Still thinking about whether or not to have multiple layers
+    of markers (if they are visibly different perhaps it's OK).  Another thing we will add is multiple
+    layers of continuous data (e.g. climate, land use) shown as semi-transparent bitmap or vector graphics.
+  isCore: false  # though map will ship with basic markers
+  consumes: markerData
+  produces: 
+
+a-marker:
+  description: one marker from the-markers
+  isCore: false
+  consumes: markerData
+  emits: REPLACE_GEOSELECTION, ADD_TO_GEOSELECTION, REMOVE_FROM_GEOSELECTION
+
+view-selector:
+  description:
+    allows user to choose between views (e.g. sample view, abundance view, genotype view)
+  isCore: true
+  consumes: availableViews
+  produces: currentView
+
+
+panel-selector:
+  description: allows the user to choose between the panels available for the current view
+  isCore: true
+  consumes: availablePanels
+  produces: currentPanel
+
+details-table:
+  description:
+    One of many classes of pluggable panel but will be used as a primary example here.
+    Shows record data in a table. 
+  isCore: false
+  consumes: panels.detailsTable.recordData
+
+stacked-timeline-plot:
+  description:
+    Another example of a panel that may only be available in some views.
+  isCore: false
+  consumes: panels.stackedTimelinePlot.timelineData
+
+active-filters:
+  description:
+    The place where currently active filters (on date and/or metadata but not on geolocation) are displayed.
+    In MapVEu 1.0 these are displayed in the search-box.
+  isCore: true
+
+
+search-box:
+  description:
+    A place for users to type to create autocompleted filters
+  isCore: true
+
+
+the-legend:
+  description:
+    A classic "search filter" listing the number of displayed records stratified by a metadata field ("category field" aka catField)
+  isCore: true
+
+
+date-picker:
+  description:
+    A date range selector (that emits a date filter) that also displays a simple histogram of number
+    of records per year/month/day as appropriate
+  isCore: false  # shipped map should work for data with no date fields
+
+
+### STATE DATA
+
+availableViews:
+  description: 
+    A list of views available in this instance of MapVEu. From config.
+
+currentView:
+  description:
+    The current active view selected in view-selector
+
+markerData:
+  description:
+    An array of data structures - one per marker, containing the result of the server-side aggregation,
+    which is basically counts per species (if catField is species)
+
+availableMarkers:
+  description:
+    A list of the markers that are available in the current view.
+  accesses: currentView
+
+currentMarker:
+  description:
+    The currently active marker type
+
+availablePanels:
+  description:
+    A list of the panels that are available in the current view.
+  accesses: currentView
+  
+currentPanel:
+  description:
+    The currently active panel type
+
+
+
+
+### MESSAGES
+
+MOVED_OR_ZOOMED:
+  description: user pans or zooms or resizes their browser window 
+  payload: new_bbox, ?old_bbox
+  senders: the-map
+  recipients: core
+
+REPLACE_GEOSELECTION:
+  description: click on a marker, draw a rectangle or polygon
+  payload: bbox or polygon + unique_id
+  senders: a-marker, the-map
+  recipients: core
+
+ADD_TO_GEOSELECTION:
+  description: ctrl-click marker (multi-select), multi-select rectangle/polygons
+  payload: bbox or polygon + unique_id
+  senders: a-marker, the-map
+  recipients: core
+
+REMOVE_FROM_GEOSELECTION:
+  description: ctrl-click already selected marker or drawn rectangle/polygon
+  payload: unique_id (see previous two payloads)
+  senders: a-marker, the-map
+  recipients: core
+
+CLEAR_GEOSELECTION:
+  description: click somewhere outside markers/selection
+  payload: none
+  senders: the-map
+  recipients: core
+
+
+
+
