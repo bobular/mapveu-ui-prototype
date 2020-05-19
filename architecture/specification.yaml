@@ -18,7 +18,8 @@
 # markers: A set of available/allowed marker classes is configured per view.
 #          All views must have at least one marker type configured.  Markers will always be
 #          semantically zoomed according to either geohash_x fields or some other fields (e.g. country, adm1, adm2).
-#          Markers that need special data (e.g. data specific to chromosomal inversions) need special data service endpoints.
+#          Markers that need special data (e.g. data specific to chromosomal inversions) need
+#          marker-type-specific data service endpoints.
 #
 # panels: A set of available/allowed panel classes is configured per view.
 #         Example panels would be "details table" or "stacked timeline plot" or "download CSV"
@@ -31,6 +32,21 @@
 #
 # At a time, one view, one marker type and one panel can be active.  We are thinking of putting
 # these in the URL (single page application with forward/backward history).
+#
+# "Page" URLs could therefore be
+#
+#  /view/ViewName/marker/MarkerType/panel/PanelType?other=params
+#
+# or more simply
+#
+#  /ViewName/MarkerType/PanelType?other=params
+#
+# however, the more verbose URL scheme might allow for more complex behaviour in
+# future (e.g. multiple markers active at once: /view/ViewName/markers/MarkerType1/MarkerType2/panel/PanelType?other=params )
+#
+# The data service (see https://github.com/bobular/mapveu-rest-prototype) also a /view/ViewName prefix to its endpoint URLs.
+# Which means that /view/Sample/marker/RecordCount/markerData should return different data compare to
+# /view/Genotype/marker/RecordCount/markerData
 #
 #
 # filters:
