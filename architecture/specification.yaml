@@ -5,7 +5,9 @@
 #
 # Data: camelCase
 #
-# Messages: LIKE_THIS
+# Messages: LIKE_THIS(payload)
+#
+# 
 #
 
 ### OVERALL UI ARCHITECTURE
@@ -50,8 +52,11 @@
 #
 #
 # filters:
-#  geo-based: viewport bounding box, current selected marker(s) and or drawn polygons
-#  metadata-based: e.g. species=Anopheles gambiae, date="2002 to 2005"
+#
+#  geo-based: viewport bounding box, current selected marker(s) and or drawn polygons - referred to as SELECTIONS
+#             all geo-based filters use geo fields
+#
+#  metadata-based: e.g. species=Anopheles gambiae, date="2002 to 2005"                - referred to as FILTERS
 #
 # field names: The 'species' and 'date' field names in the filter examples above will be configured per view.
 #              For a given field, there could be a display field and a search field.  The display field
@@ -73,14 +78,30 @@ the-map:
   description:
     The main zoomable map, handled by Leaflet.js.  Usually full-screen, but not necessarily.
   isCore: true
-  emits: MOVED_OR_ZOOMED, CLEAR_GEOSELECTION
-
-marker-selector:
-  description:
-    Allows the user to choose which type of marker (from those configured for this view) to use
-  isCore: true
-  consumes: availableMarkers
-  produces: currentMarker
+  events:
+    navigating:
+      description: user is zooming, panning, or resizing their browser window
+      emits: MOVING_OR_ZOOMING(), CLEAR_SELECTION()  (maybe both not needed)
+    finished_navigating:
+      description: user has finished navigating
+      emits: MOVED_OR_ZOOMED(new bbox)
+    click_in_map:
+      description: user clicks in the map, NOT on a marker or any other element
+      emits: CLEAR_SELECTION()
+    drawn_polygon:
+      description: user has drawn a rectangle or polygon to make a selection
+      emits: REPLACE_SELECTION(polgon)
+    add_drawn_polygon:
+      description: user has drawn a shape with CTRL key (or equivalent) pressed because they want to add to previous
+      emits: ADD_TO_SELECTION(polygon)
+    remove_drawn_polygon:
+      description: user cancels previously drawn polygon
+      emits: REMOVE_DRAWN_POLYGON(polygon)
+      notes:
+        Will the polygon persist as an element/component on the map? Probably.
+        In that case the polygon will be its own element, and this event will be handled
+	by that, not 'the-map'.
+      
 
 the-markers:
   description:
@@ -90,19 +111,40 @@ the-markers:
     layers of continuous data (e.g. climate, land use) shown as semi-transparent bitmap or vector graphics.
   isCore: false  # though map will ship with basic markers
   consumes: markerData
-  produces: 
 
 a-marker:
   description: one marker from the-markers
   isCore: false
   consumes: markerData
-  emits: REPLACE_GEOSELECTION, ADD_TO_GEOSELECTION, REMOVE_FROM_GEOSELECTION
+  events:
+    click:
+      description: user clicks normally on a marker
+      emits: REPLACE_SELECTION(polygon)   # technically a polygon (bounding box of the marker's aggregated data) or
+                                          # a filter on the aggregating field, e.g. geohash_x:abc or country:Mali
+					  # could be passed as the payload - might be easier to keep it all geometry based.
+    ctrl-click:
+      description: user is adding (or removing if already selected) another marker to the selection
+      emits: ADD_TO_SELECTION(polygon) or REMOVE_FROM_SELECTION(polygon)
+  notes:
+    Need to thrash out the mechanics of adding and removing markers from a multi-selection.
+    Does a marker itself know if it's selected?  Or does the central state management keep track?
+  
+
+marker-selector:
+  description:
+    Allows the user to choose which type of marker (from those configured for this view) to use
+  isCore: true
+  consumes: availableMarkers, currentMarker
+  events:
+    on-change:
+      emits: UPDATE_MARKER_TYPE(markerType)
+      
 
 view-selector:
   description:
     allows user to choose between views (e.g. sample view, abundance view, genotype view)
   isCore: true
-  consumes: availableViews
+  consumes: availableViews, currentView
   produces: currentView
 
 
@@ -154,12 +196,10 @@ date-picker:
 ### STATE DATA
 
 availableViews:
-  description: 
-    A list of views available in this instance of MapVEu. From config.
+  description: A list of views available in this instance of MapVEu. From config.
 
 currentView:
-  description:
-    The current active view selected in view-selector
+  description: The current active view selected in view-selector
 
 markerData:
   description:
@@ -167,56 +207,85 @@ markerData:
     which is basically counts per species (if catField is species)
 
 availableMarkers:
-  description:
-    A list of the markers that are available in the current view.
+  description: A list of the markers that are available in the current view.
   accesses: currentView
 
 currentMarker:
-  description:
-    The currently active marker type
+  description: The currently active marker type
 
 availablePanels:
-  description:
-    A list of the panels that are available in the current view.
+  description: A list of the panels that are available in the current view.
   accesses: currentView
   
 currentPanel:
-  description:
-    The currently active panel type
+  description: The currently active panel type
 
+currentBBox:
+  description: The current viewport bounding box in map coordinates
 
+currentFilters:
+  description: a list of currently active metadata-based filters
 
+currentSelection:
+  description: a list of currently active geo-based filters
 
 ### MESSAGES
 
-MOVED_OR_ZOOMED:
-  description: user pans or zooms or resizes their browser window 
-  payload: new_bbox, ?old_bbox
-  senders: the-map
-  recipients: core
+#
+# synchronous unless marked as
+#   async: true
+# 
 
-REPLACE_GEOSELECTION:
+MOVING_OR_ZOOMING:
+  description: user is moving or zooming around the map, or resizing their window
+  payload: 
+  action:
+    description: need to hide any panels so the user can see the full extent of the map
+    emits: HIDE_PANEL()
+
+MOVED_OR_ZOOMED:
+  description: user has finished panning/zooming/resizing their browser window 
+  payload: new_bbox
+  action:
+    description: updates the bounding box
+    updates: currentBBox = new_bbox
+    emits: UPDATE_MARKERS()
+
+UPDATE_MARKERS:
+  description: update the aggregated marker data. Downstream, 'the-markers' will need to be redrawn
+  payload:
+  action:
+    description: sends request to back end for new aggregated marker data
+    consumes: currentBBox, currentView, currentMarker, currentFilters, catField
+    updates: markerData
+    async: true
+
+UPDATE_MARKER_TYPE:
+  description: change the current type of markers displayed
+  payload: markerType
+  action:
+    updates: currentMarker = markerType
+    emits: CLEAR_SELECTION(), UPDATE_MARKERS()    
+    notes: Clear selection even if that selection is purely polygon based?
+
+REPLACE_SELECTION:
   description: click on a marker, draw a rectangle or polygon
   payload: bbox or polygon + unique_id
-  senders: a-marker, the-map
   recipients: core
 
-ADD_TO_GEOSELECTION:
+ADD_TO_SELECTION:
   description: ctrl-click marker (multi-select), multi-select rectangle/polygons
   payload: bbox or polygon + unique_id
-  senders: a-marker, the-map
   recipients: core
 
-REMOVE_FROM_GEOSELECTION:
+REMOVE_FROM_SELECTION:
   description: ctrl-click already selected marker or drawn rectangle/polygon
   payload: unique_id (see previous two payloads)
-  senders: a-marker, the-map
   recipients: core
 
-CLEAR_GEOSELECTION:
+CLEAR_SELECTION:
   description: click somewhere outside markers/selection
   payload: none
-  senders: the-map
   recipients: core
 
 
