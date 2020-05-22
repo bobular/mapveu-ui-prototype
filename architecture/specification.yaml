@@ -51,6 +51,7 @@
 # /view/Genotype/marker/RecordCount/markerData
 #
 #
+## filters (in the data structure sense)
 # filters:
 #
 #  geo-based: viewport bounding box, current selected marker(s) and or drawn polygons - referred to as SELECTIONS
@@ -58,6 +59,20 @@
 #
 #  metadata-based: e.g. species=Anopheles gambiae, date="2002 to 2005"                - referred to as FILTERS
 #
+## filters (in the UI component sense)
+#
+# The legend and date picker are filters that should probably stay on the screen
+# independently of panels.  But they should probably be organised in the same
+# modular fashion as panels.  So state data would be organised something like this:
+#
+#   filters.legend.paletteData
+#   filters.legend.categoryCounts
+#
+#   filters.datePicker.dateResolution
+#   filters.datePicker.timelineData
+#
+#
+##
 # field names: The 'species' and 'date' field names in the filter examples above will be configured per view.
 #              For a given field, there could be a display field and a search field.  The display field
 #              might be single-valued string-type (in terms of Solr faceting behaviour) while the search
@@ -160,7 +175,11 @@ panel-selector:
       emits: SET_ACTIVE_PANEL(panelType)
 
 
-
+#
+# the next two panel components (details-table and stacked-timeline-plot)
+# are examples of content that needs to be rendered and updated when the panel
+# is active (e.g. in focus/foreground/selected by user) only
+#
 
 details-table:
   description:
@@ -188,10 +207,12 @@ stacked-timeline-plot:
 stacked-timeline-plot-ui:
   description: UI for setting the date resolution for the timeline plot
   isCore: false
+  consumes: panels.stackedTimelinePlot.dateResolution, currentView.availableDateResolutions (from config)
   events:
     on-change:
       emits: SET_STACKED_TIMELINE_PLOT_RESOLUTION(dateResolution)
       
+
 
 
 active-filters:
@@ -203,21 +224,39 @@ active-filters:
 
 search-box:
   description:
-    A place for users to type to create autocompleted filters
+    A place for users to type to create filters with the help of autocomplete/suggest
   isCore: true
 
-
-the-legend:
-  description:
-    A classic "search filter" listing the number of displayed records stratified by a metadata field ("category field" aka catField)
-  isCore: true
 
 
 date-picker:
   description:
     A date range selector (that emits a date filter) that also displays a simple histogram of number
     of records per year/month/day as appropriate
-  isCore: false  # shipped map should work for data with no date fields
+  isCore: false  # shipped map should work for data with no date fields, so this should be configurable
+  consumes: filters.datePicker.timelineData, filters.datePicker.dateResolution
+  events:
+    on-submit:
+      description: user has selected a date range and clicked submit, filter created is date-based
+      emits: ADD_TO_FILTERS(filter)
+
+date-picker-ui:
+  description: user-selected date resolution (as an example - scrolling and zooming could also be part of the date picker histogram)
+  isCore: false
+  consumes: filters.datePicker.dateResolution, currentView.availableDateResolutions (from config)
+  events:
+    on-change:
+      description: update the date resolution
+      emits: SET_DATEPICKER_DATE_RESOLUTION(dateResolution)
+
+
+
+the-legend:
+  description:
+    A classic "search filter" listing the number of displayed records stratified by a metadata field ("category field" aka catField)
+  isCore: true
+  notes: TBC another time
+
 
 
 ### STATE DATA
@@ -268,6 +307,13 @@ panels.stackedTimelinePlot.dateResolution:
   description: day, week, month or year (aggregation level for timeline plotting)
 
 
+filters.datePicker.timelineData:
+  description: simple counts of records per date unit (day, week, month, year) for display in a bar chart
+
+filters.datePicker.dateResolution:
+  description: day, week, month or year (aggregation level for simple timeline plotting)
+
+
 ### MESSAGES
 
 #
@@ -288,9 +334,9 @@ MOVED_OR_ZOOMED:
   action:
     description: updates the bounding box
     updates: userBBox = new_bbox
-    emits: SET_MARKERS()
+    emits: UPDATE_MARKERS()
 
-SET_MARKERS:
+UPDATE_MARKERS:
   description: update the aggregated marker data. Downstream, 'the-markers' will need to be redrawn
   payload:
   action:
@@ -305,7 +351,7 @@ SET_ACTIVE_MARKER:
   consumes: availableMarkers
   action:
     updates: activeMarker = availableMarkers.filter(type==markerType || default==true)
-    emits: CLEAR_SELECTION(), SET_MARKERS()    
+    emits: CLEAR_SELECTION(), UPDATE_MARKERS()    
     notes: Clear selection even if that selection is purely polygon based?
 
 SET_AVAILABLE_MARKERS:
@@ -351,13 +397,13 @@ UPDATE_ACTIVE_PANEL_CONTENTS:
   actions:
     DetailsTable:
       consumes: activeView, userSelection, userFilters, panels.detailsTable.showColumns
-      updates: panels.detailsTable.recordData = ajax('api/DetailsTable', activeView, userSelection, userFilters, panels.detailsTable.showColumns)
+      updates: panels.detailsTable.recordData = ajax('api/panels/DetailsTable', activeView, userSelection, userFilters, panels.detailsTable.showColumns)
       async: true
       notes: paging & sorting params not yet included here
     StackedTimelinePlot
       consumes: activeView, userSelection, userFilters, panels.stackedTimelinePlot.dateResolution
       updates:
-        panels.stackedTimelinePlot.timelineData = ajax('api/StackedTimelinePlot', activeView, userSelection, userFilters, panels.stackedTimelinePlot.dateResolution)
+        panels.stackedTimelinePlot.timelineData = ajax('api/panels/StackedTimelinePlot', activeView, userSelection, userFilters, panels.stackedTimelinePlot.dateResolution)
 
 
 SET_STACKED_TIMELINE_PLOT_RESOLUTION:
@@ -378,9 +424,41 @@ SET_DETAILS_TABLE_COLUMNS:
 
 
 
+
+
+SET_DATEPICKER_DATE_RESOLUTION:
+  description:
+  payload: dateResolution
+  consumes:
+  action:
+    updates: filters.datePicker.dateResolution = dateResolution
+    emits: UPDATE_DATEPICKER()
+
+UPDATE_DATEPICKER:
+  description:
+  payload:
+  action:
+    consumes: activeView, userFilters, filters.datePicker.dateResolution
+    updates:
+      filters.datePicker.timelineData = ajax('api/filters/DatePicker', activeView, userFilters, filters.datePicker.dateResolution)
+    async: true
+    
+
+
+ADD_TO_FILTERS:
+  description: add a new metadata-based filter to userFilters
+  payload: filter
+  action:
+    updates: userFilters = userFilters + filter
+    emits: UPDATE_MARKERS(), UPDATE_ACTIVE_PANEL_CONTENTS()  # and UPDATE_DATEPICKER(), UPDATE_LEGEND()... and any action that depends on userFilters - subscriptions?
+
+
+
 #
 # TBC...
 #
+
+
 
 REPLACE_SELECTION:
   description: click on a marker, draw a rectangle or polygon
