@@ -119,9 +119,10 @@ a-marker:
   events:
     click:
       description: user clicks normally on a marker
-      emits: REPLACE_SELECTION(polygon)   # technically a polygon (bounding box of the marker's aggregated data) or
+      emits: REPLACE_SELECTION(polygon)   # technically the payload could be a polygon
+                                          # (bounding box of the marker's aggregated data) or
                                           # a filter on the aggregating field, e.g. geohash_x:abc or country:Mali
-					  # could be passed as the payload - might be easier to keep it all geometry based.
+					  # It might be simpler to keep it all geometry based.
     ctrl-click:
       description: user is adding (or removing if already selected) another marker to the selection
       emits: ADD_TO_SELECTION(polygon) or REMOVE_FROM_SELECTION(polygon)
@@ -134,38 +135,64 @@ marker-selector:
   description:
     Allows the user to choose which type of marker (from those configured for this view) to use
   isCore: true
-  consumes: availableMarkers, currentMarker
+  consumes: availableMarkers, activeMarker
   events:
     on-change:
-      emits: UPDATE_MARKER_TYPE(markerType)
+      emits: SET_ACTIVE_MARKER(markerType)
       
 
 view-selector:
   description:
     allows user to choose between views (e.g. sample view, abundance view, genotype view)
   isCore: true
-  consumes: availableViews, currentView
-  produces: currentView
+  consumes: availableViews, activeView
+  events:
+    on-change:
+      emits: SET_VIEW(viewName)
 
 
 panel-selector:
-  description: allows the user to choose between the panels available for the current view
+  description: allows the user to choose/focus one panel from the panels available for the active view
   isCore: true
   consumes: availablePanels
-  produces: currentPanel
+  events:
+    on-change:
+      emits: SET_ACTIVE_PANEL(panelType)
+
+
+
 
 details-table:
   description:
     One of many classes of pluggable panel but will be used as a primary example here.
-    Shows record data in a table. 
+    Shows record data in a table.
+    Would be rendered in a panel of class DetailsTable (aka InfoTable in the Vue prototype)
   isCore: false
   consumes: panels.detailsTable.recordData
+
+details-table-ui:
+  description: UI for choosing which columns to show (for example)
+  isCore: false
+  consumes: activePanel.columns # columns could be configured in the config object
+  events:
+    on-change:
+      emits: SET_DETAILS_TABLE_COLUMNS(columns)
+
 
 stacked-timeline-plot:
   description:
     Another example of a panel that may only be available in some views.
   isCore: false
   consumes: panels.stackedTimelinePlot.timelineData
+
+stacked-timeline-plot-ui:
+  description: UI for setting the date resolution for the timeline plot
+  isCore: false
+  events:
+    on-change:
+      emits: SET_STACKED_TIMELINE_PLOT_RESOLUTION(dateResolution)
+      
+
 
 active-filters:
   description:
@@ -198,7 +225,7 @@ date-picker:
 availableViews:
   description: A list of views available in this instance of MapVEu. From config.
 
-currentView:
+activeView:
   description: The current active view selected in view-selector
 
 markerData:
@@ -207,27 +234,39 @@ markerData:
     which is basically counts per species (if catField is species)
 
 availableMarkers:
-  description: A list of the markers that are available in the current view.
-  accesses: currentView
+  description: A list of the markers that are available in the active view. From config.
 
-currentMarker:
+activeMarker:
   description: The currently active marker type
 
 availablePanels:
-  description: A list of the panels that are available in the current view.
-  accesses: currentView
+  description: A list of the panels that are available in the current view. From config.
   
-currentPanel:
+activePanel:
   description: The currently active panel type
 
-currentBBox:
-  description: The current viewport bounding box in map coordinates
+userBBox:
+  description: The user's current viewport bounding box in map coordinates
 
-currentFilters:
+userFilters:
   description: a list of currently active metadata-based filters
 
-currentSelection:
+userSelection:
   description: a list of currently active geo-based filters
+
+
+panels.detailsTable.recordData:
+  description: the current 'page' of records for display in a table
+
+panels.detailsTable.showColumns
+  description: which columns the user has currently selected for display (and perhaps their order)
+  
+panels.stackedTimelinePlot.timelineData:
+  description: the data needed to show a stacked timeline plot
+
+panels.stackedTimelinePlot.dateResolution:
+  description: day, week, month or year (aggregation level for timeline plotting)
+
 
 ### MESSAGES
 
@@ -248,35 +287,109 @@ MOVED_OR_ZOOMED:
   payload: new_bbox
   action:
     description: updates the bounding box
-    updates: currentBBox = new_bbox
-    emits: UPDATE_MARKERS()
+    updates: userBBox = new_bbox
+    emits: SET_MARKERS()
 
-UPDATE_MARKERS:
+SET_MARKERS:
   description: update the aggregated marker data. Downstream, 'the-markers' will need to be redrawn
   payload:
   action:
     description: sends request to back end for new aggregated marker data
-    consumes: currentBBox, currentView, currentMarker, currentFilters, catField
+    consumes: userBBox, activeView, activeMarker, userFilters, catField
     updates: markerData
     async: true
 
-UPDATE_MARKER_TYPE:
-  description: change the current type of markers displayed
+SET_ACTIVE_MARKER:
+  description: change the current type of markers displayed, if no payload then set to default marker type
   payload: markerType
+  consumes: availableMarkers
   action:
-    updates: currentMarker = markerType
-    emits: CLEAR_SELECTION(), UPDATE_MARKERS()    
+    updates: activeMarker = availableMarkers.filter(type==markerType || default==true)
+    emits: CLEAR_SELECTION(), SET_MARKERS()    
     notes: Clear selection even if that selection is purely polygon based?
+
+SET_AVAILABLE_MARKERS:
+  description: sets the available marker types (primarily needed for the marker select menu)
+  payload: markerType
+  consumes: activeView
+  action:
+    updates: availableMarkers = activeView.markers
+    emits: SET_ACTIVE_MARKER()
+
+SET_VIEW:
+  description: change the view or set to default view if no payload
+  payload: viewName
+  consumes: availableViews
+  action:
+    updates: activeView = availableViews.filter(name==viewName || default==true)
+    emits: CLEAR_SELECTION(), SET_AVAILABLE_MARKERS(), SET_AVAILABLE_PANELS()    
+    notes: Clear selection even if that selection is purely polygon based?
+
+SET_ACTIVE_PANEL:
+  description: change the active panel or set to default panel if no payload
+  payload: panelType
+  consumes: availablePanels
+  action:
+    updates: activePanel = availablePanels.filter(type==panelType || default==true)
+    emits: UPDATE_ACTIVE_PANEL_CONTENTS()   
+
+SET_AVAILABLE_PANELS:
+  description: sets the available panel types (primarily needed to render the panel tabs)
+  payload: panelType
+  consumes: activeView
+  action:
+    updates: availablePanels = activeView.markers
+    emits: SET_ACTIVE_PANEL()
+
+
+UPDATE_ACTIVE_PANEL_CONTENTS:
+  description:
+    This is where it gets tricky. A panel could be a "DetailsTable" or it could be a "StackedTimelinePlot".
+    I'll describe what should happen in both cases below.  But how this works in React I don't know.
+  payload: none
+  consumes: activePanel
+  actions:
+    DetailsTable:
+      consumes: activeView, userSelection, userFilters, panels.detailsTable.showColumns
+      updates: panels.detailsTable.recordData = ajax('api/DetailsTable', activeView, userSelection, userFilters, panels.detailsTable.showColumns)
+      async: true
+      notes: paging & sorting params not yet included here
+    StackedTimelinePlot
+      consumes: activeView, userSelection, userFilters, panels.stackedTimelinePlot.dateResolution
+      updates:
+        panels.stackedTimelinePlot.timelineData = ajax('api/StackedTimelinePlot', activeView, userSelection, userFilters, panels.stackedTimelinePlot.dateResolution)
+
+
+SET_STACKED_TIMELINE_PLOT_RESOLUTION:
+  description: updates the timeline plot date resolution
+  payload: dateResolution
+  consumes:
+  action:
+    updates: panels.stackedTimelinePlot.dateResolution = dateResolution
+    emits: UPDATE_ACTIVE_PANEL_CONTENTS()
+
+SET_DETAILS_TABLE_COLUMNS:
+  description: updates the column selection/order for the detailsTable
+  payload: columns
+  consumes:
+  action:
+    updates: panels.detailsTable.showColumns = columns
+    emits: UPDATE_ACTIVE_PANEL_CONTENTS()
+
+
+
+#
+# TBC...
+#
 
 REPLACE_SELECTION:
   description: click on a marker, draw a rectangle or polygon
   payload: bbox or polygon + unique_id
-  recipients: core
+
 
 ADD_TO_SELECTION:
   description: ctrl-click marker (multi-select), multi-select rectangle/polygons
   payload: bbox or polygon + unique_id
-  recipients: core
 
 REMOVE_FROM_SELECTION:
   description: ctrl-click already selected marker or drawn rectangle/polygon
